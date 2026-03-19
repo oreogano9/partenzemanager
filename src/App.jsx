@@ -69,13 +69,18 @@ const TRANSLATIONS = {
     atPlane: 'At Plane',
     std: 'STD',
     noFlights: 'No matching flights',
+    glossary: 'Glossary',
+    protocols: 'Protocols',
     bl_def: 'Local Luggage',
     bt_def: 'Transit Luggage',
     akh_def: 'Low Height Container',
     ake_def: 'Large Container',
     bs_def: 'Short Transfer Luggage',
     fm_def: 'Oversized (FM)',
-    noTagRule: 'Put on ground. Notify Team Leader.',
+    rushRule: 'Keep on belt. Load last. Do not scan.',
+    transitRule: 'Transit baggage can be mixed.',
+    priorityRule: 'Immediate trolley.',
+    noTagRule: 'Put on ground. Notify TL immediately.',
     sorted: 'Sorted',
     stacked: 'Stacked',
     pastHidden: 'Past hidden',
@@ -95,13 +100,18 @@ const TRANSLATIONS = {
     atPlane: 'Sotto Bordo',
     std: 'STD',
     noFlights: 'Nessun volo corrispondente',
+    glossary: 'Glossario',
+    protocols: 'Protocolli',
     bl_def: 'Bagagli Local',
     bt_def: 'Bagagli Transito',
     akh_def: 'Contenitore Basso',
     ake_def: 'Contenitore Grande',
     bs_def: 'Short Transfer',
     fm_def: 'Fuori Misura',
-    noTagRule: 'Mettere a terra. Avvisare Team Leader.',
+    rushRule: 'Resta sul nastro. Carica per ultimo. Non scansionare.',
+    transitRule: 'Il bagaglio in transito puo essere mischiato.',
+    priorityRule: 'Carrello immediato.',
+    noTagRule: 'Mettere a terra. Avvisare subito il TL.',
     sorted: 'Smistato',
     stacked: 'Impilato',
     pastHidden: 'Passati nascosti',
@@ -123,12 +133,18 @@ const getPositionCategory = (val, terminal) => {
 };
 
 const getUrgencyColor = (diffMin) => {
-  const maxSafe = 120;
-  const minCrit = 45;
-  if (diffMin >= maxSafe) return 'hsl(140, 75%, 35%)';
-  if (diffMin <= minCrit) return 'hsl(0, 85%, 45%)';
-  const normalized = (diffMin - minCrit) / (maxSafe - minCrit);
-  return `hsl(${normalized * 140}, 80%, 40%)`;
+  if (diffMin >= 120) return 'hsl(140, 75%, 35%)';
+  if (diffMin <= 45) return 'hsl(0, 85%, 45%)';
+
+  if (diffMin > 70) {
+    const normalized = (diffMin - 70) / 50;
+    const hue = 35 + normalized * 105;
+    return `hsl(${hue}, 80%, 40%)`;
+  }
+
+  const normalized = (diffMin - 45) / 25;
+  const hue = normalized * 35;
+  return `hsl(${hue}, 85%, 45%)`;
 };
 
 const parseTime = (timeStr, baseDate) => {
@@ -582,6 +598,12 @@ function App() {
                         </div>
                       )}
 
+                      {flight.status.delivered === false && flight.richiesta && (
+                        <div className="mb-3 rounded-xl border border-amber-100 bg-amber-50 p-2 text-center text-[10px] font-bold uppercase text-amber-700 shadow-sm">
+                          {t.rushRule}
+                        </div>
+                      )}
+
                       {flight.richiesta && (
                         <button
                           onClick={() => {
@@ -612,25 +634,25 @@ function App() {
           <div className="space-y-3 rounded-2xl border border-slate-200 border-l-8 border-l-orange-500 bg-white p-4 text-[10px] shadow-sm">
             <h3 className="flex items-center gap-2 font-black uppercase tracking-widest text-slate-900">
               <Stethoscope className="h-3.5 w-3.5 text-orange-500" />
-              Protocols
+              {t.protocols}
             </h3>
             <div className="grid grid-cols-1 gap-3 font-bold text-slate-600 md:grid-cols-2">
               <div className="flex gap-2">
                 <Star className="h-3.5 w-3.5 shrink-0 text-indigo-600" />
                 <p>
-                  <span className="font-black uppercase text-indigo-900">Priority</span> Carrello immediato.
+                  <span className="font-black uppercase text-indigo-900">Priority</span> {t.priorityRule}
                 </p>
               </div>
               <div className="flex gap-2">
                 <ArrowRightCircle className="h-3.5 w-3.5 shrink-0 text-amber-500" />
                 <p>
-                  <span className="font-black uppercase text-amber-700">Rush</span> No scan. Carica alla fine.
+                  <span className="font-black uppercase text-amber-700">Rush</span> {t.rushRule}
                 </p>
               </div>
               <div className="flex gap-2">
                 <AlertOctagon className="h-3.5 w-3.5 shrink-0 text-red-600" />
                 <p>
-                  <span className="font-black uppercase text-red-700">No Tag</span> A terra. Avvisa TL.
+                  <span className="font-black uppercase text-red-700">No Tag</span> {t.noTagRule}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -643,16 +665,16 @@ function App() {
           </div>
           <div className="grid grid-cols-3 gap-2 rounded-2xl border border-indigo-800 bg-indigo-950 p-4 text-center text-[9px] text-white shadow-lg">
             <div>
-              <span className="mb-1 block font-black uppercase opacity-40">Local / Trans</span>
-              {t.bl_def} / {t.bt_def}
+              <span className="mb-1 block font-black uppercase opacity-40">{t.glossary}</span>
+              BL: {t.bl_def}
             </div>
             <div>
-              <span className="mb-1 block font-black uppercase opacity-40">Short / Overs</span>
-              {t.bs_def} / {t.fm_def}
+              <span className="mb-1 block font-black uppercase opacity-40">Transit / Short</span>
+              BT: {t.bt_def}. {t.transitRule}
             </div>
             <div>
-              <span className="mb-1 block font-black uppercase opacity-40">AKE / AKH</span>
-              {t.ake_def} / {t.akh_def}
+              <span className="mb-1 block font-black uppercase opacity-40">BS / FM / AKE / AKH</span>
+              BS: {t.bs_def}. FM: {t.fm_def}. AKE / AKH: {t.ake_def} / {t.akh_def}
             </div>
           </div>
         </footer>
