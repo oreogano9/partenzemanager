@@ -23,6 +23,8 @@ import {
   Tags,
   Trash2,
   Truck,
+  ChevronDown as MoveDown,
+  ChevronUp as MoveUp,
 } from 'lucide-react';
 
 const T1_DATA = [
@@ -157,14 +159,89 @@ const parseTime = (timeStr, baseDate) => {
 
 const formatICSDate = (date) => date.toISOString().replace(/-|:|\.\d+/g, '');
 
+const getUnitTypeMeta = (token, lang) => {
+  const normalized = token.trim().toUpperCase();
+
+  if (normalized.includes('BL')) {
+    return {
+      type: 'local',
+      label: lang === 'it' ? 'Bagagli Locali' : 'Local Baggage',
+      accent: 'border-emerald-300 bg-emerald-50',
+      badge: 'bg-emerald-600 text-white',
+      pill: 'bg-emerald-600',
+    };
+  }
+
+  if (normalized.includes('BS')) {
+    return {
+      type: 'short',
+      label: lang === 'it' ? 'Bagagli Short Transfer' : 'Short Transfer Baggage',
+      accent: 'border-red-300 bg-red-50',
+      badge: 'bg-red-600 text-white',
+      pill: 'bg-red-600',
+    };
+  }
+
+  if (normalized.includes('BT')) {
+    return {
+      type: 'transit',
+      label: lang === 'it' ? 'Bagagli Transiti' : 'Transit Baggage',
+      accent: 'border-blue-300 bg-blue-50',
+      badge: 'bg-blue-600 text-white',
+      pill: 'bg-blue-600',
+    };
+  }
+
+  if (normalized.includes('AKH')) {
+    return {
+      type: 'akh',
+      label: 'AKH Extra',
+      accent: 'border-indigo-300 bg-indigo-50',
+      badge: 'bg-indigo-600 text-white',
+      pill: 'bg-indigo-600',
+    };
+  }
+
+  if (normalized.includes('AKE')) {
+    return {
+      type: 'ake',
+      label: 'AKE Extra',
+      accent: 'border-violet-300 bg-violet-50',
+      badge: 'bg-violet-600 text-white',
+      pill: 'bg-violet-600',
+    };
+  }
+
+  return {
+    type: 'other',
+    label: token.trim(),
+    accent: 'border-slate-300 bg-slate-50',
+    badge: 'bg-slate-700 text-white',
+    pill: 'bg-slate-700',
+  };
+};
+
 const parseInitialUnits = (richiesta) => {
   if (!richiesta) return [];
-  return richiesta.split('/').map((part, index) => ({
-    id: `unit-${index}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    label: part.trim(),
-    status: 'pending',
-    tags: [],
-  }));
+
+  return richiesta
+    .split('/')
+    .flatMap((part) => {
+      const trimmed = part.trim();
+      const match = trimmed.match(/^(\d+)\s*(.+)$/);
+      const count = match ? Number(match[1]) : 1;
+      const rawToken = match ? match[2].trim() : trimmed;
+      const meta = getUnitTypeMeta(rawToken, 'it');
+
+      return Array.from({ length: count }, (_, index) => ({
+        id: `unit-${rawToken}-${index}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        label: count > 1 ? `${meta.label} ${index + 1}` : meta.label,
+        rawToken,
+        type: meta.type,
+        status: 'pending',
+        tags: [],
+      }));
+    });
 };
 
 const initialFlightState = (flight) => ({
@@ -245,7 +322,23 @@ function App() {
     );
   };
 
+  const moveUnit = (code, id, direction) => {
+    setCurrentFlights((prev) =>
+      prev.map((flight) => {
+        if (flight.code !== code) return flight;
+        const index = flight.units.findIndex((unit) => unit.id === id);
+        if (index === -1) return flight;
+        const nextIndex = direction === 'up' ? index - 1 : index + 1;
+        if (nextIndex < 0 || nextIndex >= flight.units.length) return flight;
+        const units = [...flight.units];
+        [units[index], units[nextIndex]] = [units[nextIndex], units[index]];
+        return { ...flight, units };
+      })
+    );
+  };
+
   const addExtraUnit = (code, type) => {
+    const meta = getUnitTypeMeta(type, lang);
     setCurrentFlights((prev) =>
       prev.map((flight) =>
         flight.code === code
@@ -253,7 +346,14 @@ function App() {
               ...flight,
               units: [
                 ...flight.units,
-                { id: `ex-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, label: `${type} Extra`, status: 'pending', tags: [] },
+                {
+                  id: `ex-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                  label: meta.label,
+                  rawToken: type,
+                  type: meta.type,
+                  status: 'pending',
+                  tags: [],
+                },
               ],
             }
           : flight
@@ -297,23 +397,29 @@ function App() {
         </header>
         <main className="mx-auto max-w-2xl space-y-4 p-4">
           {activeFlightObject.units.map((unit, index) => (
+            (() => {
+              const meta = getUnitTypeMeta(unit.rawToken || unit.label, lang);
+              return (
             <div
               key={unit.id}
-              className={`rounded-2xl border-2 bg-white p-4 transition-all ${
+              className={`rounded-2xl border-2 p-4 transition-all ${
                 unit.status === 'loaded'
                   ? 'border-emerald-500 bg-emerald-50'
                   : unit.status === 'loading'
                     ? 'animate-pulse border-orange-400 bg-orange-50'
-                    : 'border-slate-200'
+                    : meta.accent
               }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-black text-white shadow-sm">
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black text-white shadow-sm ${meta.pill}`}>
                     {index + 1}
                   </div>
                   <div>
                     <p className="pt-0.5 text-sm font-black uppercase leading-tight">{unit.label}</p>
+                    <p className={`mt-1 inline-flex rounded-md px-2 py-0.5 text-[9px] font-black uppercase ${meta.badge}`}>
+                      {unit.type}
+                    </p>
                     <div className="mt-1.5 flex flex-wrap gap-1">
                       {unit.tags.map((tag) => (
                         <span
@@ -333,6 +439,20 @@ function App() {
                   </div>
                 </div>
                 <div className="flex gap-1">
+                  <button
+                    onClick={() => moveUnit(activeFlightObject.code, unit.id, 'up')}
+                    disabled={index === 0}
+                    className="rounded-lg p-2 text-slate-400 transition-colors hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    <MoveUp className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => moveUnit(activeFlightObject.code, unit.id, 'down')}
+                    disabled={index === activeFlightObject.units.length - 1}
+                    className="rounded-lg p-2 text-slate-400 transition-colors hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    <MoveDown className="h-4 w-4" />
+                  </button>
                   <button
                     onClick={() =>
                       updateUnit(activeFlightObject.code, unit.id, {
@@ -374,6 +494,8 @@ function App() {
                 ))}
               </div>
             </div>
+              );
+            })()
           ))}
           <div className="grid grid-cols-3 gap-2 pt-4">
             <button
