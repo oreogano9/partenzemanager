@@ -28,32 +28,32 @@ import {
 } from 'lucide-react';
 
 const T1_DATA = [
-  { code: 'LH 1873', belt: '50', dest: 'MUC', airline: 'Lufthansa', std: '07:00', fc: 'CARR', richiesta: '1BL / 2BT / 1BS', tot: '4AKH' },
-  { code: 'LH 243', belt: '49', dest: 'FRA', airline: 'Lufthansa', std: '07:05', fc: 'CARR', richiesta: '1BL / 4BT / 2 IAH 440', tot: '7AKH' },
-  { code: 'IB 658', belt: '39', dest: 'MAD', airline: 'Iberia', std: '07:30', fc: 'CARR', richiesta: '2BL / 2BT / 1BS', tot: '5AKH' },
-  { code: 'DX 1701', belt: '46', dest: 'AOI', airline: 'Danish Air', std: '07:40', fc: '', richiesta: '', tot: '' },
-  { code: 'FR 4902', belt: '48', dest: 'PMO', airline: 'Ryanair', std: '08:00', fc: '', richiesta: '', tot: '' },
-  { code: 'FR 1170', belt: '44', dest: 'CTA', airline: 'Ryanair', std: '08:35', fc: '', richiesta: '', tot: '' },
-  { code: 'FR 999', belt: '47', dest: 'VLC', airline: 'Ryanair', std: '08:40', fc: '', richiesta: '', tot: '' },
-  { code: 'FR 1198', belt: '45', dest: 'ATH', airline: 'Ryanair', std: '08:45', fc: '', richiesta: '', tot: '' },
-  { code: 'KM 613', belt: '39', dest: 'MLA', airline: 'Air Malta', std: '08:55', fc: '', richiesta: '', tot: '' },
-  { code: 'FR 9601', belt: '43', dest: 'MAD', airline: 'Ryanair', std: '09:25', fc: '', richiesta: '', tot: '' },
-  { code: 'FR 407', belt: '42', dest: 'CPH', airline: 'Ryanair', std: '09:25', fc: '', richiesta: '', tot: '' },
-  { code: 'LX 1727', belt: '50', dest: 'ZRH', airline: 'Swiss', std: '09:35', fc: '', richiesta: '2BL+FC / 2BT / 1BS', tot: '5AKH' },
-  { code: 'FR 41', belt: '41', dest: 'BER', airline: 'Ryanair', std: '09:35', fc: '', richiesta: '', tot: '' },
-  { code: 'VY 6101', belt: '46', dest: 'BCN', airline: 'Vueling', std: '09:45', fc: '', richiesta: '', tot: '' },
-  { code: 'LH 231', belt: '64', dest: 'FRA', airline: 'Lufthansa', std: '09:45', fc: 'CARR', richiesta: '1BL / 4BT / 1 IAH UA 047-1 HND 716', tot: '7AKH' },
-  { code: 'EW 9883', belt: '39', dest: 'DUS', airline: 'Eurowings', std: '10:05', fc: '', richiesta: '', tot: '' },
-  { code: 'OS 552', belt: '49', dest: 'VIE', airline: 'Austrian', std: '10:15', fc: 'CARR', richiesta: '5BL / 1BT / BS CARR', tot: '6AKH' },
-  { code: 'VY 6255', belt: '46', dest: 'ORY', airline: 'Vueling', std: '10:20', fc: '', richiesta: '', tot: '' },
-  { code: 'A3 651', belt: '64', dest: 'ATH', airline: 'Aegean', std: '10:35', fc: '', richiesta: '', tot: '' },
+  { code: 'LH 1873', belt: '50', dest: 'MUC', airline: 'Lufthansa', std: '16:57', fc: 'CARR', richiesta: '1BL / 2BT / 1BS', tot: '4AKH' },
+  { code: 'LH 243', belt: '49', dest: 'FRA', airline: 'Lufthansa', std: '17:02', fc: 'CARR', richiesta: '1BL / 4BT / 2 IAH 440', tot: '7AKH' },
+  { code: 'IB 658', belt: '39', dest: 'MAD', airline: 'Iberia', std: '17:27', fc: 'CARR', richiesta: '2BL / 2BT / 1BS', tot: '5AKH' },
+  { code: 'DX 1701', belt: '46', dest: 'AOI', airline: 'Danish Air', std: '17:37', fc: '', richiesta: '', tot: '' },
+  { code: 'FR 4902', belt: '48', dest: 'PMO', airline: 'Ryanair', std: '17:57', fc: '', richiesta: '', tot: '' },
+  { code: 'FR 1170', belt: '44', dest: 'CTA', airline: 'Ryanair', std: '18:32', fc: '', richiesta: '', tot: '' },
+  { code: 'FR 999', belt: '47', dest: 'VLC', airline: 'Ryanair', std: '18:37', fc: '', richiesta: '', tot: '' },
+  { code: 'FR 1198', belt: '45', dest: 'ATH', airline: 'Ryanair', std: '18:42', fc: '', richiesta: '', tot: '' },
+  { code: 'KM 613', belt: '39', dest: 'MLA', airline: 'Air Malta', std: '18:52', fc: '', richiesta: '', tot: '' },
+  { code: 'FR 9601', belt: '43', dest: 'MAD', airline: 'Ryanair', std: '19:22', fc: '', richiesta: '', tot: '' },
+  { code: 'FR 407', belt: '42', dest: 'CPH', airline: 'Ryanair', std: '19:22', fc: '', richiesta: '', tot: '' },
+  { code: 'LX 1727', belt: '50', dest: 'ZRH', airline: 'Swiss', std: '19:32', fc: '', richiesta: '2BL+FC / 2BT / 1BS', tot: '5AKH' },
+  { code: 'FR 41', belt: '41', dest: 'BER', airline: 'Ryanair', std: '19:32', fc: '', richiesta: '', tot: '' },
+  { code: 'VY 6101', belt: '46', dest: 'BCN', airline: 'Vueling', std: '19:42', fc: '', richiesta: '', tot: '' },
+  { code: 'LH 231', belt: '64', dest: 'FRA', airline: 'Lufthansa', std: '19:42', fc: 'CARR', richiesta: '1BL / 4BT / 1 IAH UA 047-1 HND 716', tot: '7AKH' },
+  { code: 'EW 9883', belt: '39', dest: 'DUS', airline: 'Eurowings', std: '20:02', fc: '', richiesta: '', tot: '' },
+  { code: 'OS 552', belt: '49', dest: 'VIE', airline: 'Austrian', std: '20:12', fc: 'CARR', richiesta: '5BL / 1BT / BS CARR', tot: '6AKH' },
+  { code: 'VY 6255', belt: '46', dest: 'ORY', airline: 'Vueling', std: '20:17', fc: '', richiesta: '', tot: '' },
+  { code: 'A3 651', belt: '64', dest: 'ATH', airline: 'Aegean', std: '20:32', fc: '', richiesta: '', tot: '' },
 ];
 
 const T3_DATA = [
-  { code: 'AZ 601', belt: '12', dest: 'JFK', airline: 'ITA Airways', std: '10:10', richiesta: '3BL / 1BT', tot: '4AKH' },
-  { code: 'DL 182', belt: '10', dest: 'ATL', airline: 'Delta', std: '10:45', richiesta: '2BL / 2BT / 1BS', tot: '5AKH' },
-  { code: 'UA 40', belt: '8', dest: 'EWR', airline: 'United', std: '11:20', richiesta: '4BL', tot: '4AKH' },
-  { code: 'AA 235', belt: '6', dest: 'ORD', airline: 'American', std: '12:00', richiesta: '2BL / 1BT / 1BS', tot: '4AKH' },
+  { code: 'AZ 601', belt: '12', dest: 'JFK', airline: 'ITA Airways', std: '20:07', richiesta: '3BL / 1BT', tot: '4AKH' },
+  { code: 'DL 182', belt: '10', dest: 'ATL', airline: 'Delta', std: '20:42', richiesta: '2BL / 2BT / 1BS', tot: '5AKH' },
+  { code: 'UA 40', belt: '8', dest: 'EWR', airline: 'United', std: '21:17', richiesta: '4BL', tot: '4AKH' },
+  { code: 'AA 235', belt: '6', dest: 'ORD', airline: 'American', std: '21:57', richiesta: '2BL / 1BT / 1BS', tot: '4AKH' },
 ];
 
 const TRANSLATIONS = {
@@ -61,6 +61,8 @@ const TRANSLATIONS = {
     back: 'Back',
     totalTasks: 'Total',
     urgent: 'Urgent',
+    timeline: 'Timeline',
+    nextToHandle: 'Flights to handle',
     belt: 'Belt',
     chute: 'Chute',
     bay: 'Bay',
@@ -92,6 +94,8 @@ const TRANSLATIONS = {
     back: 'Indietro',
     totalTasks: 'Totali',
     urgent: 'Urgenti',
+    timeline: 'Timeline',
+    nextToHandle: 'Voli da gestire',
     belt: 'Nastro',
     chute: 'Scivolo',
     bay: 'Baia',
@@ -612,6 +616,60 @@ function App() {
         </div>
 
         <div className="space-y-2 pt-1">
+          {visibleFlights.length > 0 && (
+            <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-[8px] font-black uppercase tracking-[0.24em] text-slate-400">{t.timeline}</p>
+                  <h2 className="text-sm font-black uppercase tracking-tight text-slate-900">{t.nextToHandle}</h2>
+                </div>
+                <div className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase text-slate-500">
+                  {visibleFlights.length}
+                </div>
+              </div>
+              <div className="space-y-0">
+                {visibleFlights.map((flight, index) => {
+                  const stdTime = parseTime(flight.std, now);
+                  const target = new Date(stdTime.getTime() - 45 * 60000);
+                  const diffMin = (target - now) / 60000;
+                  const urgencyBg = getUrgencyColor(diffMin);
+                  const category = getPositionCategory(flight.belt, terminal);
+
+                  return (
+                    <div key={`timeline-${flight.code}`} className="grid grid-cols-[20px_1fr] gap-3">
+                      <div className="flex flex-col items-center">
+                        <div
+                          style={{ backgroundColor: urgencyBg }}
+                          className="mt-1 h-3 w-3 rounded-full border-2 border-white shadow"
+                        />
+                        {index !== visibleFlights.length - 1 && <div className="mt-1 w-px flex-1 bg-slate-200" />}
+                      </div>
+                      <button
+                        onClick={() => setExpandedFlight(expandedFlight === flight.code ? null : flight.code)}
+                        className="mb-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-left transition-colors hover:bg-slate-100"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-tight text-slate-900">{flight.code}</p>
+                            <p className="text-[10px] font-bold uppercase text-slate-500">
+                              {flight.dest} • {t[category.toLowerCase()]} {flight.belt}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[9px] font-black uppercase text-slate-400">{t.atPlaneBy}</p>
+                            <p className="text-xs font-black text-slate-800">
+                              {target.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           {visibleFlights.length === 0 ? (
             <div className="py-20 text-center text-slate-400">
               <Building2 className="mx-auto mb-2 h-12 w-12 opacity-20" />
