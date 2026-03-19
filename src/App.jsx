@@ -125,8 +125,8 @@ const getPositionCategory = (val, terminal) => {
   const num = parseInt(val, 10);
   if (Number.isNaN(num)) return 'BAY';
   if (terminal === 'T1') {
-    if ((num >= 1 && num <= 11) || (num >= 40 && num <= 48)) return 'CHUTE';
     if (num === 39 || num === 46) return 'BELT';
+    if ((num >= 1 && num <= 11) || (num >= 40 && num <= 48)) return 'CHUTE';
     return 'BAY';
   }
   if ([6, 8, 10, 12].includes(num)) return 'BAY';
