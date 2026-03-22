@@ -163,6 +163,30 @@ const parseTime = (timeStr, baseDate) => {
 
 const formatICSDate = (date) => date.toISOString().replace(/-|:|\.\d+/g, '');
 
+const timeToMinutes = (timeStr) => {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+const minutesToTime = (totalMinutes) => {
+  const normalized = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60);
+  const hours = String(Math.floor(normalized / 60)).padStart(2, '0');
+  const minutes = String(normalized % 60).padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
+const shiftSchedule = (flights, now) => {
+  if (flights.length === 0) return flights;
+  const firstStd = timeToMinutes(flights[0].std);
+  const targetStart = now.getHours() * 60 + now.getMinutes() + 30;
+  const offset = targetStart - firstStd;
+
+  return flights.map((flight) => ({
+    ...flight,
+    std: minutesToTime(timeToMinutes(flight.std) + offset),
+  }));
+};
+
 const getUnitTypeMeta = (token, lang) => {
   const normalized = token.trim().toUpperCase();
 
@@ -254,6 +278,13 @@ const initialFlightState = (flight) => ({
   units: parseInitialUnits(flight.richiesta),
 });
 
+const formatHourLabel = (date) =>
+  date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
 function App() {
   const [lang, setLang] = useState('it');
   const [now, setNow] = useState(new Date());
@@ -262,8 +293,8 @@ function App() {
   const [activeFlightCode, setActiveFlightCode] = useState(null);
   const [expandedFlight, setExpandedFlight] = useState(null);
   const [hidePast, setHidePast] = useState(true);
-  const [t1Flights, setT1Flights] = useState(() => T1_DATA.map(initialFlightState));
-  const [t3Flights, setT3Flights] = useState(() => T3_DATA.map(initialFlightState));
+  const [t1Flights, setT1Flights] = useState(() => shiftSchedule(T1_DATA, new Date()).map(initialFlightState));
+  const [t3Flights, setT3Flights] = useState(() => shiftSchedule(T3_DATA, new Date()).map(initialFlightState));
   const [filters, setFilters] = useState({ chute: 'All', belt: 'All', bay: 'All' });
 
   const t = TRANSLATIONS[lang];
@@ -307,6 +338,62 @@ function App() {
         .sort((a, b) => parseTime(a.std, now) - parseTime(b.std, now)),
     [currentFlights, filters, hidePast, now]
   );
+
+  const timelineLayout = useMemo(() => {
+    if (visibleFlights.length === 0) {
+      return { items: [], hourMarkers: [], totalMinutes: 60, laneCount: 1, startTime: now };
+    }
+
+    const events = visibleFlights.map((flight) => {
+      const stdTime = parseTime(flight.std, now);
+      const startTime = new Date(stdTime.getTime() - 45 * 60000);
+      return {
+        flight,
+        stdTime,
+        startTime,
+        endTime: stdTime,
+      };
+    });
+
+    const minStart = new Date(Math.min(...events.map((event) => event.startTime.getTime())));
+    const maxEnd = new Date(Math.max(...events.map((event) => event.endTime.getTime())));
+    const gridStart = new Date(minStart);
+    gridStart.setMinutes(0, 0, 0);
+    const gridEnd = new Date(maxEnd);
+    gridEnd.setHours(gridEnd.getHours() + 1, 0, 0, 0);
+
+    const lanes = [];
+    const items = events.map((event) => {
+      let lane = lanes.findIndex((laneEnd) => laneEnd <= event.startTime.getTime());
+      if (lane === -1) {
+        lane = lanes.length;
+        lanes.push(event.endTime.getTime());
+      } else {
+        lanes[lane] = event.endTime.getTime();
+      }
+
+      return {
+        ...event,
+        lane,
+        startOffset: (event.startTime.getTime() - gridStart.getTime()) / 60000,
+        durationMinutes: (event.endTime.getTime() - event.startTime.getTime()) / 60000,
+      };
+    });
+
+    const totalMinutes = Math.max(60, (gridEnd.getTime() - gridStart.getTime()) / 60000);
+    const hourMarkers = [];
+    for (let marker = new Date(gridStart); marker <= gridEnd; marker = new Date(marker.getTime() + 60 * 60000)) {
+      hourMarkers.push(new Date(marker));
+    }
+
+    return {
+      items,
+      hourMarkers,
+      totalMinutes,
+      laneCount: Math.max(1, lanes.length),
+      startTime: gridStart,
+    };
+  }, [visibleFlights, now]);
 
   const toggleFlightStatus = (code, key) => {
     setCurrentFlights((prev) =>
@@ -627,45 +714,64 @@ function App() {
                   {visibleFlights.length}
                 </div>
               </div>
-              <div className="space-y-0">
-                {visibleFlights.map((flight, index) => {
-                  const stdTime = parseTime(flight.std, now);
-                  const target = new Date(stdTime.getTime() - 45 * 60000);
-                  const diffMin = (target - now) / 60000;
-                  const urgencyBg = getUrgencyColor(diffMin);
-                  const category = getPositionCategory(flight.belt, terminal);
-
-                  return (
-                    <div key={`timeline-${flight.code}`} className="grid grid-cols-[20px_1fr] gap-3">
-                      <div className="flex flex-col items-center">
+              <div className="overflow-x-auto">
+                <div className="min-w-[720px]">
+                  <div
+                    className="mb-2 grid gap-2 text-[10px] font-black uppercase text-slate-400"
+                    style={{ gridTemplateColumns: `repeat(${timelineLayout.hourMarkers.length}, minmax(0, 1fr))` }}
+                  >
+                    {timelineLayout.hourMarkers.map((marker) => (
+                      <div key={marker.toISOString()}>{formatHourLabel(marker)}</div>
+                    ))}
+                  </div>
+                  <div
+                    className="relative rounded-xl border border-slate-200 bg-slate-50"
+                    style={{ height: `${timelineLayout.laneCount * 72 + 16}px` }}
+                  >
+                    {timelineLayout.hourMarkers.map((marker) => {
+                      const left = ((marker.getTime() - timelineLayout.startTime.getTime()) / 60000 / timelineLayout.totalMinutes) * 100;
+                      return (
                         <div
-                          style={{ backgroundColor: urgencyBg }}
-                          className="mt-1 h-3 w-3 rounded-full border-2 border-white shadow"
+                          key={`grid-${marker.toISOString()}`}
+                          className="absolute bottom-0 top-0 w-px bg-slate-200"
+                          style={{ left: `${left}%` }}
                         />
-                        {index !== visibleFlights.length - 1 && <div className="mt-1 w-px flex-1 bg-slate-200" />}
-                      </div>
-                      <button
-                        onClick={() => setExpandedFlight(expandedFlight === flight.code ? null : flight.code)}
-                        className="mb-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-left transition-colors hover:bg-slate-100"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-tight text-slate-900">{flight.code}</p>
-                            <p className="text-[10px] font-bold uppercase text-slate-500">
-                              {flight.dest} • {t[category.toLowerCase()]} {flight.belt}
-                            </p>
+                      );
+                    })}
+                    {timelineLayout.items.map((item) => {
+                      const target = item.startTime;
+                      const diffMin = (target - now) / 60000;
+                      const urgencyBg = getUrgencyColor(diffMin);
+                      const category = getPositionCategory(item.flight.belt, terminal);
+                      const left = (item.startOffset / timelineLayout.totalMinutes) * 100;
+                      const width = Math.max((item.durationMinutes / timelineLayout.totalMinutes) * 100, 8);
+
+                      return (
+                        <button
+                          key={`timeline-${item.flight.code}`}
+                          onClick={() => setExpandedFlight(expandedFlight === item.flight.code ? null : item.flight.code)}
+                          className="absolute overflow-hidden rounded-xl border border-white/70 px-3 py-2 text-left text-white shadow-md transition-transform hover:scale-[1.01]"
+                          style={{
+                            left: `${left}%`,
+                            top: `${item.lane * 72 + 8}px`,
+                            width: `${width}%`,
+                            minWidth: '120px',
+                            backgroundColor: urgencyBg,
+                          }}
+                        >
+                          <p className="text-[10px] font-black uppercase tracking-tight">{item.flight.code}</p>
+                          <p className="text-[10px] font-bold uppercase text-white/80">
+                            {item.flight.dest} • {t[category.toLowerCase()]} {item.flight.belt}
+                          </p>
+                          <div className="mt-2 flex items-center justify-between text-[10px] font-black">
+                            <span>{formatHourLabel(item.startTime)}</span>
+                            <span>{item.flight.std}</span>
                           </div>
-                          <div className="text-right">
-                            <p className="text-[9px] font-black uppercase text-slate-400">{t.atPlaneBy}</p>
-                            <p className="text-xs font-black text-slate-800">
-                              {target.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
-                            </p>
-                          </div>
-                        </div>
-                      </button>
-                    </div>
-                  );
-                })}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </section>
           )}
